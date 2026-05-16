@@ -344,35 +344,10 @@
       margin-bottom: 32px;
     }
 
-    #ymap {
-      height: 380px;
-      border-radius: 20px;
-      overflow: hidden;
-      background: var(--bg-card);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     @media (min-width: 768px) {
-      #ymap {
+      #map-section iframe {
         height: 500px;
       }
-    }
-
-    .map-fallback {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      color: var(--text-muted);
-      padding: 40px;
-      text-align: center;
-    }
-
-    .map-fallback .map-icon {
-      font-size: 3rem;
     }
 
     /* ===== TRANSPORT ===== */
@@ -1380,13 +1355,14 @@
         <h2 class="section-title">Куда едем</h2>
         <p class="section-sub">Владимирская область, г. Киржач, СНТ Геолог</p>
       </div>
-      <div id="ymap" class="fade-in">
-        <div class="map-fallback">
-          <div class="map-icon">🗺️</div>
-          <div>Карта загружается…</div>
-          <div style="font-size:0.85rem;opacity:0.7">56.185493, 38.843142</div>
-        </div>
-      </div>
+      <iframe
+        class="fade-in"
+        src="https://yandex.ru/map-widget/v1/?um=constructor%3A3d4f646d63143e0e39638f7fd510295cf3c42e12bedee88ffe930393dc1afda9&source=constructor"
+        width="100%"
+        height="380px"
+        frameborder="0"
+        style="border-radius: 20px; display: block;"
+      ></iframe>
     </div>
   </section>
 
@@ -1629,7 +1605,6 @@
     const SUPABASE_URL = 'https://gkprgrlfvuskgdzbunjr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHJncmxmdnVza2dkemJ1bmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MjMyMzIsImV4cCI6MjA5NDQ5OTIzMn0.7r8iy5_ormmjybRoAkG6VAjL8uzYSDGfkZ5FTbJLvK4';
     const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mdabqvwp';
-    const YANDEX_MAPS_API_KEY = '573a7ff6-c4d2-4951-85e8-3e447956cb36';
 
     // Supabase client
     let sb;
@@ -2186,59 +2161,7 @@
       } catch (e) { console.warn('Realtime error:', e.message); }
     }
 
-    // ===== YANDEX MAPS =====
-    function loadMap() {
-      const s = document.createElement('script');
-      s.src = `https://api-maps.yandex.ru/v3/?lang=ru_RU&apikey=${YANDEX_MAPS_API_KEY}`;
-      s.onload = initMap;
-      s.onerror = () => showMapFallback('Не удалось загрузить карту');
-      document.head.appendChild(s);
-    }
 
-    async function initMap() {
-      try {
-        await ymaps3.ready;
-        const { YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker } = ymaps3;
-        const mapEl = document.getElementById('ymap');
-        mapEl.innerHTML = '';
-
-        const map = new YMap(mapEl, { location: { center: [38.843142, 56.185493], zoom: 14 } });
-        map.addChild(new YMapDefaultSchemeLayer({}));
-        map.addChild(new YMapDefaultFeaturesLayer({}));
-
-        const pin = document.createElement('div');
-        pin.style.cssText = `
-      width:36px;height:36px;
-      background:var(--accent);
-      border-radius:50% 50% 50% 0;
-      transform:rotate(-45deg);
-      border:3px solid white;
-      box-shadow:0 4px 14px rgba(0,0,0,0.35);
-      position:relative;
-    `;
-        const dot = document.createElement('div');
-        dot.style.cssText = 'width:10px;height:10px;background:white;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)';
-        pin.appendChild(dot);
-
-        const anchor = document.createElement('div');
-        anchor.style.transform = 'rotate(45deg)';
-        anchor.appendChild(pin);
-
-        map.addChild(new YMapMarker({ coordinates: [38.843142, 56.185493], anchor: [0.3, 1] }, anchor));
-      } catch (e) {
-        console.warn('Map init error:', e);
-        showMapFallback('Ошибка инициализации карты');
-      }
-    }
-
-    function showMapFallback(msg) {
-      document.getElementById('ymap').innerHTML = `
-    <div class="map-fallback">
-      <div class="map-icon">🗺️</div>
-      <div>${msg}</div>
-      <div style="font-size:0.85rem;opacity:0.6">Владимирская обл., г. Киржач, СНТ Геолог<br>56.185493, 38.843142</div>
-    </div>`;
-    }
 
     // ===== FORM HELPERS =====
     function showFieldError(el, msg) {
@@ -2430,7 +2353,6 @@
     loadSettings();
     loadCounters();
     subscribeRealtime();
-    loadMap();
   </script>
 </body>
 
