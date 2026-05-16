@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Админ-панель — Дача 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F0E8;
+  --bg-card: #E8DFC8;
+  --text: #2C2416;
+  --text-muted: #7A6A4F;
+  --accent: #C4873A;
+  --green: #4A7C59;
+  --red: #C0392B;
+  --orange: #E8A045;
+  --white: #ffffff;
+  --shadow: 0 4px 20px rgba(44,36,22,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100dvh;
+}
+button { cursor: pointer; border: none; font-family: inherit; }
+input, textarea { font-family: inherit; }
+
+/* ===== PASSWORD SCREEN ===== */
+#pw-screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #F5F0E8;
+}
+.pw-box {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.pw-box h1 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.pw-box .sub { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 32px; }
+.pw-input {
+  width: 100%;
+  border: 2px solid var(--bg-card);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 0.15em;
+  outline: none;
+  transition: border-color 0.2s;
+  color: var(--text);
+}
+.pw-input:focus { border-color: var(--accent); }
+.pw-btn {
+  width: 100%;
+  background: var(--accent);
+  color: var(--white);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 50px;
+  border: none;
+  margin-top: 16px;
+  transition: all 0.2s;
+  box-shadow: 0 6px 20px rgba(196,135,58,0.35);
+}
+.pw-btn:hover { box-shadow: 0 10px 28px rgba(196,135,58,0.5); transform: translateY(-1px); }
+.pw-err {
+  margin-top: 14px;
+  font-size: 0.9rem;
+  color: var(--red);
+  min-height: 22px;
+  display: none;
+}
+.pw-err.show { display: block; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+.pw-box.shake { animation: shake 0.4s ease; }
+
+/* ===== ADMIN PANEL ===== */
+#admin-panel { display: none; }
+#admin-panel.show { display: block; }
+
+.admin-header {
+  background: var(--text);
+  color: var(--white);
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.admin-header h1 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+.header-actions { display: flex; gap: 12px; align-items: center; }
+.btn-sm {
+  background: rgba(255,255,255,0.1);
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.btn-sm:hover { background: rgba(255,255,255,0.2); }
+.btn-sm.accent { background: var(--accent); border-color: var(--accent); }
+.btn-sm.accent:hover { background: #b07830; }
+
+.admin-body { padding: 28px 20px; max-width: 1300px; margin: 0 auto; }
+
+/* ===== STATS CARDS ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+@media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+.stat-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 22px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-num {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-num.total   { color: var(--text); }
+.stat-num.going   { color: var(--green); }
+.stat-num.maybe   { color: var(--accent); }
+.stat-num.nope    { color: var(--red); }
+.stat-lbl { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+/* ===== SECTION BLOCKS ===== */
+.admin-section {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+.admin-section h2 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-icon { font-size: 1.2rem; }
+
+/* ===== TABLE ===== */
+.tbl-wrap { overflow-x: auto; border-radius: 12px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  font-size: 0.88rem;
+}
+thead tr { background: var(--accent); }
+th {
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--white);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--bg-card);
+  color: var(--text);
+  vertical-align: top;
+}
+tbody tr:hover { background: rgba(196,135,58,0.04); }
+tbody tr:last-child td { border-bottom: none; }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.going  { background: rgba(74,124,89,0.15);  color: var(--green); }
+.badge.maybe  { background: rgba(196,135,58,0.15); color: var(--accent); }
+.badge.nope   { background: rgba(192,57,43,0.15);  color: var(--red); }
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+/* ===== DATE POPULARITY ===== */
+.date-bars { display: flex; flex-direction: column; gap: 10px; }
+.date-bar-row { display: flex; align-items: center; gap: 12px; }
+.date-label { font-size: 0.88rem; color: var(--text); min-width: 120px; font-weight: 500; }
+.bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+.bar-count { font-size: 0.85rem; color: var(--text-muted); min-width: 28px; text-align: right; font-weight: 600; }
+
+/* ===== CONTENT MANAGEMENT ===== */
+.settings-grid { display: grid; gap: 20px; }
+@media (min-width: 640px) { .settings-grid { grid-template-columns: 1fr 1fr; } }
+.settings-full { grid-column: 1 / -1; }
+
+.set-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.set-input, .set-area {
+  width: 100%;
+  background: var(--bg);
+  border: 2px solid var(--bg-card);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+.set-input:focus, .set-area:focus { border-color: var(--accent); }
+.set-area { min-height: 90px; }
+
+.save-btn {
+  background: var(--accent);
+  color: var(--white);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 13px 32px;
+  border-radius: 50px;
+  border: none;
+  margin-top: 20px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(196,135,58,0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.save-btn:hover { box-shadow: 0 8px 24px rgba(196,135,58,0.45); transform: translateY(-1px); }
+.save-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+.save-status { font-size: 0.85rem; color: var(--green); margin-top: 10px; min-height: 20px; }
+
+/* ===== LOADER ===== */
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-muted);
+  gap: 12px;
+  font-size: 0.95rem;
+}
+.spin {
+  width: 20px; height: 20px;
+  border: 2.5px solid var(--bg-card);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== REFRESH BTN ===== */
+.refresh-info {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+}
+</style>
+</head>
+<body>
+
+<!-- ===== PASSWORD SCREEN ===== -->
+<div id="pw-screen">
+  <div class="pw-box" id="pw-box">
+    <h1>Админ-панель</h1>
+    <p class="sub">Введи пароль для доступа</p>
+    <input class="pw-input" type="password" id="pw-input" placeholder="••••••••••" autocomplete="current-password">
+    <button class="pw-btn" id="pw-btn">Войти</button>
+    <div class="pw-err" id="pw-err">Неверный пароль. Попробуй ещё раз.</div>
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div id="admin-panel">
+
+  <header class="admin-header">
+    <h1>Дача 2026 — Панель управления</h1>
+    <div class="header-actions">
+      <span class="refresh-info" id="last-updated">Обновляется автоматически</span>
+      <button class="btn-sm" onclick="loadAll()">↻ Обновить</button>
+      <a href="index.html" class="btn-sm accent">← На сайт</a>
+    </div>
+  </header>
+
+  <div class="admin-body">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num total" id="st-total">—</div>
+        <div class="stat-lbl">Всего ответов</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num going" id="st-going">—</div>
+        <div class="stat-lbl">Едут</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num maybe" id="st-maybe">—</div>
+        <div class="stat-lbl">Сомневаются</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num nope" id="st-nope">—</div>
+        <div class="stat-lbl">Не смогут / не хотят</div>
+      </div>
+    </div>
+
+    <!-- RESPONSES TABLE -->
+    <div class="admin-section">
+      <h2><span class="section-icon">📋</span> Все ответы</h2>
+      <div id="table-wrap">
+        <div class="loader"><div class="spin"></div> Загрузка…</div>
+      </div>
+    </div>
+
+    <!-- DATE POPULARITY -->
+    <div class="admin-section">
+      <h2><span class="section-icon">📅</span> Популярность дат</h2>
+      <div id="dates-chart">
+        <div class="loader"><div class="spin"></div> Загрузка…</div>
+      </div>
+    </div>
+
+    <!-- CONTENT MANAGEMENT -->
+    <div class="admin-section">
+      <h2><span class="section-icon">✏️</span> Управление контентом</h2>
+      <div class="settings-grid">
+        <div class="settings-full">
+          <label class="set-label" for="s-hero">Текст приглашения (Hero)</label>
+          <textarea class="set-area" id="s-hero" rows="4"
+            placeholder="Зову вас к себе — отдохнуть, выдохнуть и отметить конец сессии…"></textarea>
+        </div>
+        <div>
+          <label class="set-label" for="s-house">Описание: Дача</label>
+          <input class="set-input" type="text" id="s-house" placeholder="Твой дом на эти дни">
+        </div>
+        <div>
+          <label class="set-label" for="s-river">Описание: Речка</label>
+          <input class="set-input" type="text" id="s-river" placeholder="Освежиться и поплавать">
+        </div>
+        <div>
+          <label class="set-label" for="s-bbq">Описание: Шашлыки</label>
+          <input class="set-input" type="text" id="s-bbq" placeholder="Куда же без них">
+        </div>
+        <div>
+          <label class="set-label" for="s-city">Описание: Киржач</label>
+          <input class="set-input" type="text" id="s-city" placeholder="Покажу свой город">
+        </div>
+      </div>
+      <!-- MOTIVATION BLOCK -->
+      <div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--bg-card)">
+        <div class="set-label" style="font-size:0.95rem;margin-bottom:16px;color:var(--text)">Блок «Несколько слов от меня»</div>
+        <div class="settings-grid">
+          <div class="settings-full">
+            <label class="set-label" for="edit-motivation-1">Абзац 1 (про анкету)</label>
+            <textarea class="set-area" id="edit-motivation-1" rows="4" placeholder="Эта анкета — первый шаг…"></textarea>
+          </div>
+          <div class="settings-full">
+            <label class="set-label" for="edit-motivation-2">Абзац 2 (про идею поездки)</label>
+            <textarea class="set-area" id="edit-motivation-2" rows="4" placeholder="Я считаю, что время, проведенное с друзьями…"></textarea>
+          </div>
+          <div class="settings-full">
+            <label class="set-label" for="edit-motivation-3">Абзац 3 (про заблаговременность)</label>
+            <textarea class="set-area" id="edit-motivation-3" rows="4" placeholder="Пишу так заранее специально…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ BLOCK -->
+      <div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--bg-card)">
+        <div class="set-label" style="font-size:0.95rem;margin-bottom:16px;color:var(--text)">Блок «Возможные вопросы»</div>
+        <div class="settings-grid">
+          <div>
+            <label class="set-label" for="edit-faq-q1">Вопрос 1</label>
+            <input class="set-input" type="text" id="edit-faq-q1" placeholder="Сколько ехать до дачи?">
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-a1">Ответ 1</label>
+            <textarea class="set-area" id="edit-faq-a1" rows="4" placeholder="Около 100–120 км…"></textarea>
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-q2">Вопрос 2</label>
+            <input class="set-input" type="text" id="edit-faq-q2" placeholder="Сколько примерно потратить денег?">
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-a2">Ответ 2</label>
+            <textarea class="set-area" id="edit-faq-a2" rows="4" placeholder="Зависит от многих факторов…"></textarea>
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-q3">Вопрос 3</label>
+            <input class="set-input" type="text" id="edit-faq-q3" placeholder="Сколько человек поместится в доме?">
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-a3">Ответ 3</label>
+            <textarea class="set-area" id="edit-faq-a3" rows="4" placeholder="В доме комфортно разместятся…"></textarea>
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-q4">Вопрос 4</label>
+            <input class="set-input" type="text" id="edit-faq-q4" placeholder="Какие удобства есть?">
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-a4">Ответ 4</label>
+            <textarea class="set-area" id="edit-faq-a4" rows="4" placeholder="Участок 12 соток…"></textarea>
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-q5">Вопрос 5</label>
+            <input class="set-input" type="text" id="edit-faq-q5" placeholder="Чем будем заниматься?">
+          </div>
+          <div>
+            <label class="set-label" for="edit-faq-a5">Ответ 5</label>
+            <textarea class="set-area" id="edit-faq-a5" rows="4" placeholder="На самой даче…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <button class="save-btn" id="save-btn" onclick="saveSettings()">
+        <span>Сохранить изменения</span>
+      </button>
+      <div class="save-status" id="save-status"></div>
+    </div>
+
+  </div><!-- /admin-body -->
+</div><!-- /admin-panel -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL         = 'https://gkprgrlfvuskgdzbunjr.supabase.co';
+const SUPABASE_ANON_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHJncmxmdnVza2dkemJ1bmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MjMyMzIsImV4cCI6MjA5NDQ5OTIzMn0.7r8iy5_ormmjybRoAkG6VAjL8uzYSDGfkZ5FTbJLvK4';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrcHJncmxmdnVza2dkemJ1bmpyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODkyMzIzMiwiZXhwIjoyMDk0NDk5MjMyfQ.tmitCUlCyZoWELCsVHxsR1tQZ8QVjP5pAXEjCenCALY';
+const ADMIN_PASSWORD       = '1706201602';
+// =================================================================
+
+let sb;
+try {
+  // Используем service role key для admin-доступа к данным
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+} catch(e) {
+  console.warn('Supabase init failed:', e.message);
+}
+
+// ===== PASSWORD =====
+const pwInput = document.getElementById('pw-input');
+const pwErr   = document.getElementById('pw-err');
+const pwBox   = document.getElementById('pw-box');
+
+function tryLogin() {
+  if (pwInput.value === ADMIN_PASSWORD) {
+    document.getElementById('pw-screen').style.display = 'none';
+    document.getElementById('admin-panel').classList.add('show');
+    loadAll();
+    subscribeRealtime();
+  } else {
+    pwErr.classList.add('show');
+    pwBox.classList.remove('shake');
+    void pwBox.offsetWidth; // reflow
+    pwBox.classList.add('shake');
+    pwInput.select();
+    setTimeout(() => pwBox.classList.remove('shake'), 500);
+  }
+}
+
+document.getElementById('pw-btn').addEventListener('click', tryLogin);
+pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+// ===== LOAD ALL DATA =====
+let allResponses = [];
+
+async function loadAll() {
+  await Promise.all([loadResponses(), loadSettings()]);
+  updateLastUpdated();
+}
+
+function updateLastUpdated() {
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    `Обновлено: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+}
+
+// ===== RESPONSES =====
+async function loadResponses() {
+  if (!sb) {
+    document.getElementById('table-wrap').innerHTML =
+      `<div class="empty-state"><div class="empty-icon">⚠️</div>Supabase не подключён — проверь ключи</div>`;
+    return;
+  }
+  try {
+    const { data, error } = await sb
+      .from('responses')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    allResponses = data || [];
+    updateStats(allResponses);
+    renderTable(allResponses);
+    renderDateChart(allResponses);
+  } catch(e) {
+    console.error('Load responses error:', e);
+    document.getElementById('table-wrap').innerHTML =
+      `<div class="empty-state"><div class="empty-icon">⚠️</div>Ошибка загрузки: ${e.message}<br><small>Проверь Supabase URL и ключ</small></div>`;
+  }
+}
+
+
+// ===== STATS =====
+const wPos = ['Да, очень хочу','Скорее хочу'];
+const cPos = ['Да, смогу','Скорее смогу'];
+const wNeg = ['Скорее не хочу','Нет'];
+const cNeg = ['Скорее нет','Нет'];
+
+function classifyRow(r) {
+  if (wPos.includes(r.wants_to_go) && cPos.includes(r.can_go)) return 'going';
+  if (wNeg.includes(r.wants_to_go) && cNeg.includes(r.can_go)) return 'nope';
+  return 'maybe';
+}
+
+function updateStats(rows) {
+  let going = 0, maybe = 0, nope = 0;
+  rows.forEach(r => {
+    const c = classifyRow(r);
+    if (c === 'going') going++;
+    else if (c === 'maybe') maybe++;
+    else nope++;
+  });
+  animNum(document.getElementById('st-total'), rows.length);
+  animNum(document.getElementById('st-going'), going);
+  animNum(document.getElementById('st-maybe'), maybe);
+  animNum(document.getElementById('st-nope'),  nope);
+}
+
+function animNum(el, to) {
+  const from = parseInt(el.textContent) || 0;
+  const dur = 500, t0 = performance.now();
+  const tick = now => {
+    const p = Math.min((now - t0) / dur, 1);
+    el.textContent = Math.round(from + (to - from) * p);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ===== TABLE =====
+function renderTable(rows) {
+  const wrap = document.getElementById('table-wrap');
+  if (!rows || rows.length === 0) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div>Ответов пока нет</div>';
+    return;
+  }
+
+  const statusLabel = { going: 'Едет', maybe: 'Сомневается', nope: 'Не едет' };
+
+  const html = `
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Дата</th>
+          <th>Имя</th>
+          <th>Хочет?</th>
+          <th>Сможет?</th>
+          <th>Статус</th>
+          <th>Даты</th>
+          <th>Период</th>
+          <th>Ночей</th>
+          <th>Комментарий</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r, i) => {
+          const cls = classifyRow(r);
+          const dt  = r.created_at ? new Date(r.created_at).toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '—';
+          const dates = Array.isArray(r.available_dates) ? r.available_dates.join(', ') : (r.available_dates || '—');
+          return `<tr>
+            <td style="color:var(--text-muted);font-size:0.8rem">${i + 1}</td>
+            <td style="white-space:nowrap;font-size:0.82rem;color:var(--text-muted)">${dt}</td>
+            <td style="font-weight:600">${esc(r.name || '—')}</td>
+            <td style="font-size:0.85rem">${esc(r.wants_to_go || '—')}</td>
+            <td style="font-size:0.85rem">${esc(r.can_go || '—')}</td>
+            <td><span class="badge ${cls}">${statusLabel[cls]}</span></td>
+            <td style="font-size:0.82rem;max-width:160px">${esc(dates || '—')}</td>
+            <td style="font-size:0.82rem;white-space:nowrap">${esc(r.preferred_period || '—')}</td>
+            <td style="font-size:0.82rem">${esc(r.nights || '—')}</td>
+            <td style="font-size:0.82rem;color:var(--text-muted);max-width:180px">${esc(r.comment || '—')}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+  wrap.innerHTML = html;
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ===== DATE POPULARITY =====
+function renderDateChart(rows) {
+  const container = document.getElementById('dates-chart');
+
+  const counts = {};
+  rows.forEach(r => {
+    const dates = Array.isArray(r.available_dates) ? r.available_dates : [];
+    dates.forEach(d => { counts[d] = (counts[d] || 0) + 1; });
+  });
+
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+  if (sorted.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div>Никто ещё не выбрал даты</div>';
+    return;
+  }
+
+  const max = sorted[0][1];
+  container.innerHTML = `<div class="date-bars">
+    ${sorted.map(([date, cnt]) => `
+      <div class="date-bar-row">
+        <div class="date-label">${esc(date)}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${max > 0 ? Math.round(cnt/max*100) : 0}%"></div>
+        </div>
+        <div class="bar-count">${cnt}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ===== SETTINGS =====
+async function loadSettings() {
+  if (!sb || false) return;
+  try {
+    const { data } = await sb.from('settings').select('key,value');
+    if (!data) return;
+    const s = {};
+    data.forEach(r => { s[r.key] = r.value; });
+    if (s.hero_text)  document.getElementById('s-hero').value  = s.hero_text;
+    if (s.desc_house)     document.getElementById('s-house').value           = s.desc_house;
+    if (s.desc_river)     document.getElementById('s-river').value           = s.desc_river;
+    if (s.desc_bbq)       document.getElementById('s-bbq').value             = s.desc_bbq;
+    if (s.desc_city)      document.getElementById('s-city').value            = s.desc_city;
+    if (s.motivation_1)   document.getElementById('edit-motivation-1').value = s.motivation_1;
+    if (s.motivation_2)   document.getElementById('edit-motivation-2').value = s.motivation_2;
+    if (s.motivation_3)   document.getElementById('edit-motivation-3').value = s.motivation_3;
+    if (s.faq_q1) document.getElementById('edit-faq-q1').value = s.faq_q1;
+    if (s.faq_a1) document.getElementById('edit-faq-a1').value = s.faq_a1;
+    if (s.faq_q2) document.getElementById('edit-faq-q2').value = s.faq_q2;
+    if (s.faq_a2) document.getElementById('edit-faq-a2').value = s.faq_a2;
+    if (s.faq_q3) document.getElementById('edit-faq-q3').value = s.faq_q3;
+    if (s.faq_a3) document.getElementById('edit-faq-a3').value = s.faq_a3;
+    if (s.faq_q4) document.getElementById('edit-faq-q4').value = s.faq_q4;
+    if (s.faq_a4) document.getElementById('edit-faq-a4').value = s.faq_a4;
+    if (s.faq_q5) document.getElementById('edit-faq-q5').value = s.faq_q5;
+    if (s.faq_a5) document.getElementById('edit-faq-a5').value = s.faq_a5;
+  } catch(e) {
+    console.warn('Settings load error:', e.message);
+  }
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('save-btn');
+  const status = document.getElementById('save-status');
+
+  if (!sb || false) {
+    status.textContent = '⚠️ Настройте Supabase для сохранения';
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = 'Сохранение…';
+
+  const pairs = [
+    { key: 'hero_text',  value: document.getElementById('s-hero').value.trim() },
+    { key: 'desc_house', value: document.getElementById('s-house').value.trim() },
+    { key: 'desc_river', value: document.getElementById('s-river').value.trim() },
+    { key: 'desc_bbq',   value: document.getElementById('s-bbq').value.trim() },
+    { key: 'desc_city',    value: document.getElementById('s-city').value.trim() },
+    { key: 'motivation_1', value: document.getElementById('edit-motivation-1').value.trim() },
+    { key: 'motivation_2', value: document.getElementById('edit-motivation-2').value.trim() },
+    { key: 'motivation_3', value: document.getElementById('edit-motivation-3').value.trim() },
+    { key: 'faq_q1', value: document.getElementById('edit-faq-q1').value.trim() },
+    { key: 'faq_a1', value: document.getElementById('edit-faq-a1').value.trim() },
+    { key: 'faq_q2', value: document.getElementById('edit-faq-q2').value.trim() },
+    { key: 'faq_a2', value: document.getElementById('edit-faq-a2').value.trim() },
+    { key: 'faq_q3', value: document.getElementById('edit-faq-q3').value.trim() },
+    { key: 'faq_a3', value: document.getElementById('edit-faq-a3').value.trim() },
+    { key: 'faq_q4', value: document.getElementById('edit-faq-q4').value.trim() },
+    { key: 'faq_a4', value: document.getElementById('edit-faq-a4').value.trim() },
+    { key: 'faq_q5', value: document.getElementById('edit-faq-q5').value.trim() },
+    { key: 'faq_a5', value: document.getElementById('edit-faq-a5').value.trim() },
+  ].filter(p => p.value);
+
+  try {
+    const { error } = await sb.from('settings').upsert(pairs, { onConflict: 'key' });
+    if (error) throw error;
+    status.textContent = '✓ Сохранено! Изменения появятся на сайте.';
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  } catch(e) {
+    status.textContent = `❌ Ошибка: ${e.message}`;
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ===== REALTIME =====
+function subscribeRealtime() {
+  if (!sb || false) return;
+  try {
+    sb.channel('admin_rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'responses' }, () => {
+        loadResponses();
+        updateLastUpdated();
+      })
+      .subscribe();
+  } catch(e) { console.warn('Realtime subscribe error:', e.message); }
+}
+</script>
+</body>
+</html>
