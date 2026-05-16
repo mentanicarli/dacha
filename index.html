@@ -967,13 +967,14 @@
     }
 
     .mini-cal .cd {
-      min-height: 30px;
-      font-size: 0.78rem;
+      min-height: 34px;
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      font-weight: 500;
     }
 
     .form-calendars {
       display: grid;
-      gap: 14px;
+      gap: 28px;
     }
 
     @media (min-width: 600px) {
@@ -1097,7 +1098,7 @@
     /* ===== MOTIVATION ===== */
     #motivation {
       padding: 80px 20px;
-      background: #ffffff;
+      background: var(--bg);
     }
 
     .motivation-inner {
@@ -1596,7 +1597,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer>
-    <p class="foot-text">Жду вашего ответа — и жду вас на даче.</p>
+    <p class="foot-text">Жду вашего ответа — и жду вас на даче</p>
     <div class="foot-sign">С нетерпением жду, Максим</div>
   </footer>
 
