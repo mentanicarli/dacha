@@ -304,6 +304,21 @@ tbody tr:last-child td { border-bottom: none; }
 .save-btn:hover { box-shadow: 0 8px 24px rgba(196,135,58,0.45); transform: translateY(-1px); }
 .save-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
 .save-status { font-size: 0.85rem; color: var(--green); margin-top: 10px; min-height: 20px; }
+.export-btn {
+  background: var(--accent);
+  color: var(--white);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.export-btn:hover { box-shadow: 0 6px 20px rgba(196,135,58,0.4); transform: translateY(-1px); }
+.responses-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.responses-header h2 { margin-bottom: 0; }
 
 /* ===== LOADER ===== */
 .loader {
@@ -381,7 +396,10 @@ tbody tr:last-child td { border-bottom: none; }
 
     <!-- RESPONSES TABLE -->
     <div class="admin-section">
-      <h2><span class="section-icon">📋</span> Все ответы</h2>
+      <div class="responses-header">
+        <h2><span class="section-icon">📋</span> Все ответы</h2>
+        <button class="export-btn" onclick="exportCSV()">Экспорт CSV</button>
+      </div>
       <div id="table-wrap">
         <div class="loader"><div class="spin"></div> Загрузка…</div>
       </div>
@@ -610,6 +628,42 @@ function animNum(el, to) {
     if (p < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
+}
+
+// ===== CSV EXPORT =====
+function exportCSV() {
+  const rows = allResponses;
+  if (!rows || rows.length === 0) return;
+
+  const headers = ['Дата', 'Имя', 'Хочет поехать', 'Сможет поехать', 'Даты', 'Период', 'Ночей', 'Кого пригласить', 'Комментарий'];
+  const escape = v => {
+    const s = (v == null ? '' : String(v)).replace(/"/g, '""');
+    return s.includes(';') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
+  };
+
+  const lines = [headers.join(';')];
+  rows.forEach(r => {
+    const dt = r.created_at ? new Date(r.created_at).toLocaleString('ru-RU') : '';
+    lines.push([
+      dt,
+      r.name,
+      r.wants_to_go,
+      r.can_go,
+      r.available_dates,
+      r.preferred_period,
+      r.nights,
+      r.invite_suggestions,
+      r.comment,
+    ].map(escape).join(';'));
+  });
+
+  const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ответы_дача.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ===== TABLE =====
