@@ -1447,14 +1447,9 @@
         <h2 class="section-title">Куда едем</h2>
         <p class="section-sub">Владимирская область, г. Киржач, СНТ Геолог</p>
       </div>
-      <iframe
-        class="fade-in"
+      <iframe class="fade-in"
         src="https://yandex.ru/map-widget/v1/?um=constructor%3A3d4f646d63143e0e39638f7fd510295cf3c42e12bedee88ffe930393dc1afda9&source=constructor"
-        width="100%"
-        height="380px"
-        frameborder="0"
-        style="border-radius: 20px; display: block;"
-      ></iframe>
+        width="100%" height="380px" frameborder="0" style="border-radius: 20px; display: block;"></iframe>
     </div>
   </section>
 
@@ -1489,7 +1484,7 @@
     <div class="container">
       <div class="fade-in" style="margin-bottom:36px">
         <h2 class="section-title">Календарь</h2>
-        <p class="section-sub">Кликни на даты в анкете ниже, чтобы выбрать удобные дни</p>
+        <p class="section-sub">Кликни на даты в календаре, чтобы узнать подробности</p>
       </div>
       <div class="cal-months fade-in" id="main-cals"></div>
       <div class="cal-legend fade-in">
@@ -1635,12 +1630,14 @@
         </div>
 
         <div class="review-card">
-          <p class="review-text">«Мой личный водитель Дамир с комфортом нас довез до места назначения. Правда я не понял почему он отдыхал с нами. В остальном все супер, очень понравился завтрак от хозяина»</p>
+          <p class="review-text">«Мой личный водитель Дамир с комфортом нас довез до места назначения. Правда я не понял
+            почему он отдыхал с нами. В остальном все супер, очень понравился завтрак от хозяина»</p>
           <span class="review-author">Марат Саидов</span>
         </div>
 
         <div class="review-card">
-          <p class="review-text">«Отличная поездка. Марат утверждал что дегустирует вино, хотя по факту просто пил. Единственная претензия — шашлык мог быть чуть лучше, но я промолчал из вежливости»</p>
+          <p class="review-text">«Отличная поездка. Марат утверждал что дегустирует вино, хотя по факту просто пил.
+            Единственная претензия — шашлык мог быть чуть лучше, но я промолчал из вежливости»</p>
           <span class="review-author">Артур Погосян</span>
         </div>
 
@@ -2235,9 +2232,9 @@
 
       (rows || []).forEach(r => {
         const wantPos = wPos.includes(r.wants_to_go);
-        const canPos  = cPos.includes(r.can_go);
+        const canPos = cPos.includes(r.can_go);
         const wantNeg = wNeg.includes(r.wants_to_go);
-        const canNeg  = cNeg.includes(r.can_go);
+        const canNeg = cNeg.includes(r.can_go);
 
         if (wantPos && canPos) {
           going++;
@@ -2368,8 +2365,8 @@
 
       const _fmtRange = dates =>
         dates.length === 0 ? '' :
-        dates.length === 1 ? dates[0] :
-        `${dates[0]} — ${dates[dates.length - 1]}`;
+          dates.length === 1 ? dates[0] :
+            `${dates[0]} — ${dates[dates.length - 1]}`;
 
       let available_dates;
       if (multiEnabled && savedIntervalDates.length > 0 && intervalDates.length > 0) {
