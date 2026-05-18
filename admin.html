@@ -637,6 +637,7 @@ function renderTable(rows) {
           <th>Период</th>
           <th>Ночей</th>
           <th>Комментарий</th>
+          <th>Кого пригласить</th>
         </tr>
       </thead>
       <tbody>
@@ -655,6 +656,7 @@ function renderTable(rows) {
             <td style="font-size:0.82rem;white-space:nowrap">${esc(r.preferred_period || '—')}</td>
             <td style="font-size:0.82rem">${esc(r.nights || '—')}</td>
             <td style="font-size:0.82rem;color:var(--text-muted);max-width:180px">${esc(r.comment || '—')}</td>
+            <td style="font-size:0.82rem;color:var(--text-muted);max-width:180px">${esc(r.invite_suggestions || '—')}</td>
           </tr>`;
         }).join('')}
       </tbody>
@@ -677,8 +679,13 @@ function renderDateChart(rows) {
 
   const counts = {};
   rows.forEach(r => {
-    const dates = Array.isArray(r.available_dates) ? r.available_dates : [];
-    dates.forEach(d => { counts[d] = (counts[d] || 0) + 1; });
+    if (!r.available_dates) return;
+    const str = typeof r.available_dates === 'string' ? r.available_dates.trim() : '';
+    if (!str) return;
+    str.split(', ').forEach(interval => {
+      const key = interval.trim();
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    });
   });
 
   const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
@@ -688,15 +695,15 @@ function renderDateChart(rows) {
     return;
   }
 
+  const votesWord = n => n === 1 ? 'голос' : n >= 2 && n <= 4 ? 'голоса' : 'голосов';
   const max = sorted[0][1];
   container.innerHTML = `<div class="date-bars">
-    ${sorted.map(([date, cnt]) => `
+    ${sorted.map(([interval, cnt]) => `
       <div class="date-bar-row">
-        <div class="date-label">${esc(date)}</div>
+        <div class="date-label">${esc(interval)}: ${cnt} ${votesWord(cnt)}</div>
         <div class="bar-track">
           <div class="bar-fill" style="width:${max > 0 ? Math.round(cnt/max*100) : 0}%"></div>
         </div>
-        <div class="bar-count">${cnt}</div>
       </div>`).join('')}
   </div>`;
 }
